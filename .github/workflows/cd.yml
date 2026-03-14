@@ -1,0 +1,47 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t devpulse-server:${{ github.sha }} ./server
+          docker tag devpulse-server:${{ github.sha }} devpulse-server:latest
+
+      # ── Push to Docker Hub (uncomment when ready) ──────────────────────────
+      # - name: Login to Docker Hub
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      #
+      # - name: Push image
+      #   run: |
+      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/devpulse-server:${{ github.sha }}
+      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/devpulse-server:latest
+
+      # ── Deploy via SSH to VPS (uncomment when ready) ───────────────────────
+      # - name: Deploy to VPS
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.VPS_HOST }}
+      #     username: ${{ secrets.VPS_USER }}
+      #     key: ${{ secrets.VPS_SSH_KEY }}
+      #     script: |
+      #       cd /opt/devpulse
+      #       docker pull ${{ secrets.DOCKERHUB_USERNAME }}/devpulse-server:latest
+      #       docker compose up -d --no-deps server
+
+      - name: Deployment summary
+        run: |
+          echo "Build ${{ github.sha }} is ready to deploy."
+          echo "Uncomment the SSH deploy step above when you have a VPS."

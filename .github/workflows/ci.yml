@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Lint ──────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: server
+        run: npm run lint
+
+  # ── Test ──────────────────────────────────────────────────────────────────
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    env:
+      NODE_ENV: test
+      MONGO_URI: mongodb://localhost:27017/devpulse_test
+      JWT_SECRET: test-secret-not-for-production
+      AGENT_API_KEY: test-agent-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: server
+        run: npm test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: server/coverage/
+
+  # ── Security audit ────────────────────────────────────────────────────────
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Audit npm dependencies
+        working-directory: server
+        # Fail on high or critical vulnerabilities only
+        run: npm audit --audit-level=high
+
+  # ── Build Docker image ────────────────────────────────────────────────────
+  build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t devpulse-server:${{ github.sha }} ./server
+
+      - name: Smoke test container
+        run: |
+          docker run -d \
+            -e NODE_ENV=production \
+            -e MONGO_URI=mongodb://host.docker.internal:27017/devpulse \
+            -e JWT_SECRET=smoke-test-secret \
+            -p 5001:5000 \
+            --name devpulse-smoke \
+            devpulse-server:${{ github.sha }}
+          sleep 5
+          curl --fail http://localhost:5001/api/health || (docker logs devpulse-smoke && exit 1)
+          docker stop devpulse-smoke

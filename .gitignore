@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Environment files — never commit secrets
+.env
+agent/.env
+server/.env
+
+# Build outputs
+server/coverage/
+server/dist/
+client/build/
+client/dist/
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jest
+junit.xml

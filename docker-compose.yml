@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  server:
+    build:
+      context: ./server
+      target: production
+    ports:
+      - '5001:5000'
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/devpulse
+      JWT_SECRET: dev-jwt-secret-change-in-prod
+      AGENT_API_KEY: dev-agent-key
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/src   # Hot reload in dev
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.adminCommand("ping")']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Mongo Express — visual DB browser at http://localhost:8081
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - '8081:8081'
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: devpulse
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
