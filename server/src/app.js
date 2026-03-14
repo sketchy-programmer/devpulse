@@ -1,3 +1,4 @@
+const velocityRouter = require('./routes/velocity');
 const sanitize = require('./middleware/sanitize');
 const express = require('express');
 const helmet = require('helmet');
@@ -69,6 +70,7 @@ app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/pipeline', pipelineRouter);
 app.use('/api/teams', teamsRouter);
+app.use('/api/velocity', velocityRouter);
 
 // ── Error handling ────────────────────────────────────────────────────────────
 app.use(notFound);
