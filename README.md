@@ -8,7 +8,8 @@ DevPulse gives engineering teams a single dashboard to monitor server health, CI
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ---
-
+## Screnshot
+![DevPulse Dashboard](dashboard.png)
 ## The problem
 
 Small engineering teams have no unified view of their operational health. They check Jenkins separately, GitHub separately, Jira separately — and by the time they notice a problem, it's already affecting users.
