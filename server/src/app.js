@@ -1,3 +1,4 @@
+const sanitize = require('./middleware/sanitize');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -47,6 +48,7 @@ const authLimiter = rateLimit({
 
 // ── General middleware ────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' })); // Prevent large payload attacks
+app.use(sanitize);
 app.use(express.urlencoded({ extended: false }));
 
 if (process.env.NODE_ENV !== 'test') {
