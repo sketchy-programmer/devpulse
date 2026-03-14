@@ -4,7 +4,7 @@
 
 DevPulse gives engineering teams a single dashboard to monitor server health, CI/CD pipeline status, and sprint velocity — without paying $500/month for enterprise tools.
 
-![CI](https://github.com/YOUR_USERNAME/devpulse/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/sketchy-programmer/devpulse/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ---
