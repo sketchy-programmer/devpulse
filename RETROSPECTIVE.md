@@ -1,7 +1,3 @@
-```
-
-Then write something like this (be honest, even a few lines is fine):
-```
 # Sprint 1 Retrospective — DevPulse
 Date: March 14, 2026
 
