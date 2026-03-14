@@ -1,3 +1,4 @@
+const { sendSlackAlert } = require('../services/alertService');
 const Metric = require('../models/Metric');
 
 /**
@@ -33,6 +34,11 @@ const createMetric = async (req, res, next) => {
       alertLevel,
       ...req.body,
     });
+
+// Send Slack alert if warning or critical
+if (alertLevel !== 'ok') {
+  sendSlackAlert(req.team, { ...req.body, alertLevel });
+}
 
     return res.status(201).json({ success: true, id: metric._id, alertLevel });
   } catch (err) {
