@@ -28,46 +28,6 @@ jobs:
         working-directory: server
         run: npm run lint
 
-        - name: Record pipeline run
-          if: always()
-          run: |
-            curl -X POST http://YOUR_SERVER_URL/api/pipeline \
-              -H "Content-Type: application/json" \
-              -H "X-Agent-Key: YOUR_AGENT_KEY" \
-              -H "X-Team-Slug: my-team" \
-              -d '{
-                "repoName": "devpulse",
-                "branch": "${{ github.ref_name }}",
-                "status": "${{ job.status }}",
-                "durationMs": 0,
-                "stages": [
-                  {"name": "lint", "status": "success"},
-                  {"name": "test", "status": "success"},
-                  {"name": "security", "status": "success"},
-                  {"name": "build", "status": "success"}
-                ]
-              }'
-
-        - name: Record pipeline run in DevPulse
-        if: always()
-        run: |
-          curl -X POST https://devpulse-production-5a8c.up.railway.app/api/pipeline \
-            -H "Content-Type: application/json" \
-            -H "X-Agent-Key: ${{ secrets.DEVPULSE_AGENT_KEY }}" \
-            -H "X-Team-Slug: my-team" \
-            -d '{
-              "repoName": "devpulse",
-              "branch": "${{ github.ref_name }}",
-              "status": "${{ job.status }}",
-              "durationMs": 0,
-              "stages": [
-                {"name": "lint", "status": "success"},
-                {"name": "test", "status": "success"},
-                {"name": "security", "status": "success"},
-                {"name": "build", "status": "${{ job.status }}"}
-              ]
-            }'
-
   # ── Test ──────────────────────────────────────────────────────────────────
   test:
     name: Test
